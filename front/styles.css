@@ -1,0 +1,100 @@
+/* ESTILOS GENERALES */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fuente principal */
+  background-color: #f8f9fa; /* Color de fondo general */
+  color: #212529;            /* Color de texto principal */
+  padding-top: 56px;         /* Espacio para la barra de navegación fija */
+  min-height: 100vh;         /* Altura mínima de la página */
+  font-size: 12px;           /* Tamaño base reducido para todo el contenido */
+}
+
+/* Títulos principales y secundarios */
+h1, h2, h3, h4, h5, h6 {
+  font-size: 24px; /* Tamaño para títulos */
+}
+
+/* ===================== */
+/* NAVEGACIÓN */
+/* ===================== */
+.navbar {
+  background-color: #2c3e50; /* Color de fondo de la barra de navegación */
+  box-shadow: 0 2px 4px rgba(255, 254, 254, 0.829); /* Sombra sutil */
+  padding: 0.5rem 1rem; /* Espaciado interno */
+}
+
+.navbar-brand {
+  font-weight: 700;      /* Marca en negrita */
+  font-size: 1.1rem;     /* Tamaño de la marca reducido */
+}
+
+.nav-link {
+  font-weight: 500;      /* Enlaces de navegación en seminegrita */
+  padding: 0.5rem 1rem;  /* Espaciado interno de los enlaces */
+  transition: all 0.3s ease; /* Transición suave al interactuar */
+  font-size: 12px;       /* Tamaño igual al contenido */
+}
+
+/* ===================== */
+/* CONTENEDOR PRINCIPAL */
+/* ===================== */
+.main-container {
+  padding: 1.5rem 0; /* Espaciado vertical reducido para el contenido principal */
+}
+
+/* ===================== */
+/* TARJETAS */
+/* ===================== */
+.card {
+  border: none; /* Sin borde */
+  border-radius: 0.25rem; /* Bordes levemente redondeados */
+  box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075); /* Sombra sutil */
+  margin-bottom: 1rem; /* Espacio inferior reducido entre tarjetas */
+}
+
+.card-header {
+  background-color: #2c3e50; /* Fondo oscuro para el encabezado de la tarjeta */
+  color: white;              /* Texto blanco */
+  padding: 0.75rem 1rem;     /* Espaciado interno reducido */
+  border-radius: 0.25rem 0.25rem 0 0 !important; /* Bordes superiores redondeados */
+  font-size: 12px;           /* Tamaño igual al contenido */
+}
+
+/* ===================== */
+/* FORMULARIOS */
+/* ===================== */
+.form-container {
+  margin-bottom: 1rem; /* Espacio inferior reducido para los formularios */
+}
+
+.form-floating label {
+  color: #6c757d;      /* Color gris para las etiquetas flotantes */
+  font-size: 12px;     /* Tamaño igual al contenido */
+}
+
+/* ===================== */
+/* TARJETAS DEL INDEX */
+/* ===================== */
+.card-home {
+  border: 1px solid rgba(0,0,0,0.125); /* Borde sutil */
+  transition: transform 0.3s ease;     /* Transición suave al hacer hover */
+  height: 100%;                        /* Altura completa */
+}
+
+.card-home:hover {
+  transform: translateY(-5px); /* Efecto de levantar la tarjeta al pasar el mouse */
+}
+
+.card-home .bi {
+  font-size: 1.5rem; /* Tamaño de los íconos en las tarjetas del index */
+}
+
+/* ===================== */
+/* TEXTOS RESPONSIVOS */
+/* ===================== */
+@media (min-width: 768px) {
+  .lead {
+    font-size: 1rem; /* Ajuste de tamaño de texto para pantallas medianas en adelante */
+  }
+}
+
+/* Puedes agregar más comentarios en otros bloques según agregues más estilos */

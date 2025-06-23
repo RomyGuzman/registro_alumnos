@@ -1,1 +1,30 @@
-[]
+[
+  {
+    "id": 1,
+    "name": "Romina Guzmán",
+    "career": "ciencia de datos e ia",
+    "age": 38,
+    "dni": "32549281"
+  },
+  {
+    "id": 2,
+    "name": "Salto Vanesa",
+    "career": "ciencia de datos e ia",
+    "age": 39,
+    "dni": "11111111"
+  },
+  {
+    "id": 3,
+    "name": "Paso Aldana",
+    "career": "prof de ingles",
+    "age": 18,
+    "dni": "22222222"
+  },
+  {
+    "id": 4,
+    "name": "lucas castro",
+    "career": "seguridad e higiene",
+    "age": 19,
+    "dni": "33333333"
+  }
+]
