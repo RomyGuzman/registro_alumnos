@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estudiantes - Gestión Educativa</title>
+  <!-- Bootstrap CSS para estilos rápidos y responsivos -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Iconos de Bootstrap -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <!-- Estilos personalizados -->
+  <link rel="stylesheet" href="styles.css">
+  <!-- SweetAlert2 para mensajes emergentes bonitos -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+  <!-- Barra de navegación superior -->
+  <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">Gestión Educativa</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <!-- Enlaces de navegación -->
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link active" href="estudiantes.html">Estudiantes</a></li>
+          <li class="nav-item"><a class="nav-link" href="carreras.html">Carreras</a></li>
+          <li class="nav-item"><a class="nav-link" href="categorias.html">Categorías</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container main-container">
+    <!-- Título principal de la página -->
+    <h1 class="mb-3">Gestión de Estudiantes</h1>
+
+    <!-- Formulario para registrar un nuevo estudiante -->
+    <div class="card form-container mb-4">
+      <div class="card-header">
+        <h5>Registrar Nuevo Estudiante</h5>
+      </div>
+      <div class="card-body">
+        <div class="row g-2">
+          <!-- Campo para el nombre del estudiante -->
+          <div class="col-md-6">
+            <div class="form-floating mb-3">
+              <input type="text" class="form-control form-control-sm" id="registerName" placeholder="Nombre">
+              <label for="registerName">Nombre completo</label>
+            </div>
+          </div>
+          <!-- Selector de carrera para el estudiante -->
+          <div class="col-md-6">
+            <div class="form-floating mb-3">
+              <select class="form-select form-select-sm" id="registerCareer">
+                <option value="" selected disabled>Seleccione...</option>
+              </select>
+              <label for="registerCareer">Carrera</label>
+            </div>
+          </div>
+          <!-- Campo para la edad del estudiante -->
+          <div class="col-md-4">
+            <div class="form-floating mb-3">
+              <input type="number" class="form-control form-control-sm" id="registerEdad" placeholder="Edad" min="15" max="80">
+              <label for="registerEdad">Edad</label>
+            </div>
+          </div>
+          <!-- Campo para el DNI del estudiante -->
+          <div class="col-md-4">
+            <div class="form-floating mb-3">
+              <input type="text" class="form-control form-control-sm" id="registerDNI" placeholder="DNI">
+              <label for="registerDNI">DNI</label>
+            </div>
+          </div>
+          <!-- Botón para registrar el estudiante -->
+          <div class="col-md-4 d-flex align-items-end">
+            <button type="button" class="btn btn-primary btn-sm w-100" onclick="registerStudent()">
+              <i class="bi bi-save"></i> Registrar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtros de búsqueda para estudiantes -->
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Filtros de Búsqueda</h5>
+        <!-- Muestra el total de estudiantes -->
+        <span class="badge bg-primary">
+          <i class="bi bi-people"></i> <span id="totalStudents">0</span>
+        </span>
+      </div>
+      <div class="card-body py-2">
+        <div class="row g-2">
+          <!-- Campo para buscar por nombre o DNI -->
+          <div class="col-md-6">
+            <div class="form-floating mb-2">
+              <input type="text" class="form-control form-control-sm" id="searchInput" placeholder="Buscar">
+              <label for="searchInput">Buscar por nombre o DNI</label>
+            </div>
+          </div>
+          <!-- Selector para filtrar por carrera -->
+          <div class="col-md-4">
+            <div class="form-floating mb-2">
+              <select class="form-select form-select-sm" id="filterCareer">
+                <option value="" selected>Todas las carreras</option>
+              </select>
+              <label for="filterCareer">Filtrar por carrera</label>
+            </div>
+          </div>
+          <!-- Botón para aplicar el filtro -->
+          <div class="col-md-2 d-flex align-items-end">
+            <button class="btn btn-sm btn-primary w-100" onclick="loadStudentsTable()">
+              <i class="bi bi-filter"></i> Filtrar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla que muestra el listado de estudiantes registrados -->
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Listado de Estudiantes</h5>
+        <!-- Botón para actualizar la lista de estudiantes -->
+        <button class="btn btn-sm btn-outline-secondary" onclick="loadStudentsTable()">
+          <i class="bi bi-arrow-repeat"></i> Actualizar
+        </button>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th width="5%">ID</th>
+                <th width="25%">Nombre</th>
+                <th width="25%">Carrera</th>
+                <th width="10%">Edad</th>
+                <th width="15%">DNI</th>
+                <th width="20%" class="text-end">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="studentsTableBody">
+              <!-- Aquí se cargan dinámicamente las filas de estudiantes -->
+              <tr>
+                <td colspan="6" class="text-center py-4">
+                  <div class="spinner-border spinner-border-sm text-primary" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+
+
+
+
+
+
+
+
+</html></body>  <script src="app.js"></script>  <!-- Script principal de la aplicación -->  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>  <!-- Bootstrap JS para componentes interactivos -->  </main>    </div>    </div>
+  </main>
+
+  <!-- Bootstrap JS para componentes interactivos -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Script principal de la aplicación -->
+  <script src="app.js"></script>
+</body>
+</html>

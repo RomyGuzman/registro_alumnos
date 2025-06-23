@@ -1,42 +1,81 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Student API Client</title>
-    <!-- <link rel="stylesheet" href="style.css"> -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home - Gestión Educativa</title>
+  <!-- Bootstrap CSS para estilos rápidos y responsivos -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Iconos de Bootstrap -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <!-- Estilos personalizados -->
+  <link rel="stylesheet" href="styles.css">
+  <!-- SweetAlert2 para mensajes emergentes bonitos -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
-    <h1>Student API Client</h1>
+  <!-- Barra de navegación superior -->
+  <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">Gestión Educativa</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <!-- Enlaces de navegación -->
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link active" href="estudiantes.html">Estudiantes</a></li>
+          <li class="nav-item"><a class="nav-link" href="carreras.html">Carreras</a></li>
+          <li class="nav-item"><a class="nav-link" href="categorias.html">Categorías</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
 
-    <section>
-        <h2>Register Student</h2>
-        <input type="text" id="registerName" placeholder="Name">
-        <input type="text" id="registerCareer" placeholder="Career">
-        <button onclick="registerStudent()">Register</button>
-        <pre id="registerResult"></pre>
-    </section>
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="pt-5 mt-4">
+    <div class="container text-center">
+      <!-- Título principal del sistema -->
+      <h1>Sistema de Gestión Educativa</h1>
 
-    <section>
-        <h2>Get Student by ID</h2>
-        <input type="number" id="studentId" placeholder="Student ID">
-        <button onclick="getStudentById()">Get Student</button>
-        <pre id="getResult"></pre>
-    </section>
+      <!-- Botones de acceso rápido -->
+      <div class="mt-5 mb-5">
+        <!-- Botón para ir a la página de registro de estudiantes -->
+        <a href="estudiantes.html" class="btn btn-primary me-3">
+          <i class="bi bi-person-plus"></i> Registrar Estudiantes
+        </a>
+        <!-- Botón para ir a la página de login administrativo -->
+        <a href="login.html" class="btn btn-primary">
+          <i class="bi bi-lock"></i> Acceso Administrativo
+        </a>
+      </div>
 
-    <section>
-        <h2>Get Students by Career</h2>
-        <input type="text" id="careerFilter" placeholder="Career">
-        <button onclick="getStudentsByCareer()">Get Students</button>
-        <pre id="careerResult"></pre>
-    </section>
+      <!-- Sección de tarjetas informativas -->
+      <div class="flex-center-cards">
+        <!-- Tarjeta "Quiénes Somos" -->
+        <div class="card">
+          <div class="card-content">
+            <h5 class="card-title">Quiénes Somos</h5>
+            <p>El Instituto Superior NovaLumen es una institución dedicada a la formación académica y profesional de excelencia, comprometida con el desarrollo integral de sus estudiantes y el progreso de la comunidad. Desde su fundación, ha promovido una educación superior basada en la calidad, la innovación y la ética, mediante planes de estudio actualizados y un claustro docente altamente calificado.
+            <p>Con una amplia oferta académica que abarca diversas áreas del conocimiento, el Instituto NovaLumen se distingue por su enfoque en la formación práctica y teórica, preparando a sus estudiantes para enfrentar los retos del mundo laboral actual. Además, fomenta un ambiente inclusivo y diverso, donde cada estudiante puede desarrollar sus habilidades y talentos únicos.
+            <p>En el Instituto Superior NovaLumen fomentamos el pensamiento crítico, la investigación y la responsabilidad social, preparando a los futuros profesionales para afrontar los desafíos de un mundo en constante transformación. Nuestra misión es ofrecer un ambiente educativo riguroso, inclusivo y participativo que impulse a cada estudiante a alcanzar su máximo potencial..</p>
+          </div>
+        </div>
 
-    <section>
-        <h2>Delete Student</h2>
-        <input type="number" id="deleteId" placeholder="Student ID">
-        <button onclick="deleteStudent()">Delete Student</button>
-        <pre id="deleteResult"></pre>
-    </section>
+        <!-- Tarjeta "Dónde Estamos" con mapa de ubicación -->
+        <div class="card">
+          <div class="card-content">
+            <h5 class="card-title">Dónde Estamos</h5>
+            <!-- Mapa de Google Maps con la ubicación del instituto -->
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3245.2007078584716!2d-58.01638372500928!3d-35.5734376093553!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95980d5145a2d7df%3A0x434edae3437dbd81!2sFranklin%20166%2C%20C7130%20Chascom%C3%BAs%2C%20Provincia%20de%20Buenos%20Aires!5e0!3m2!1ses!2sar!4v1750531679497!5m2!1ses!2sar" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
 
-    <script src="app.js"></script>
+  <!-- Bootstrap JS para componentes interactivos -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

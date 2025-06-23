@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Categorías - Gestión Educativa</title>
+  <!-- Bootstrap CSS para estilos rápidos y responsivos -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Iconos de Bootstrap -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <!-- Estilos personalizados -->
+  <link rel="stylesheet" href="styles.css">
+  <!-- SweetAlert2 para mensajes emergentes bonitos -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+  <!-- Barra de navegación superior -->
+  <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">Gestión Educativa</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <!-- Enlaces de navegación -->
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="estudiantes.html">Estudiantes</a></li>
+          <li class="nav-item"><a class="nav-link" href="carreras.html">Carreras</a></li>
+          <li class="nav-item"><a class="nav-link active" href="categorias.html">Categorías</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container main-container">
+    <!-- Título principal de la página -->
+    <h1 class="mb-3">Gestión de Categorías</h1>
+
+    <!-- Formulario para registrar una nueva categoría -->
+    <div class="card form-container">
+      <div class="card-header">
+        <h5 class="card-title">Registrar Nueva Categoría</h5>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <!-- Campo para el nombre de la categoría -->
+          <div class="col-md-10">
+            <div class="form-floating">
+              <input type="text" class="form-control" id="registerName" placeholder="Nombre">
+              <label for="registerName">Nombre</label>
+            </div>
+          </div>
+          <!-- Botón para registrar la categoría -->
+          <div class="col-md-2 d-flex align-items-end">
+            <button type="button" class="btn btn-primary w-100" onclick="CategoryUI.handleRegister()">
+              <i class="bi bi-save"></i> Registrar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtros de búsqueda para categorías -->
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Filtros de Búsqueda</h5>
+      </div>
+      <div class="card-body py-2">
+        <div class="row g-2">
+          <!-- Campo para buscar por nombre de categoría -->
+          <div class="col-md-10">
+            <div class="form-floating mb-2">
+              <input type="text" class="form-control form-control-sm" id="searchCategoryInput" placeholder="Buscar">
+              <label for="searchCategoryInput">Buscar por nombre de categoría</label>
+            </div>
+          </div>
+          <!-- Botón para aplicar el filtro -->
+          <div class="col-md-2 d-flex align-items-end">
+            <button class="btn btn-sm btn-primary w-100" onclick="filterCategories()">
+              <i class="bi bi-filter"></i> Filtrar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla que muestra el listado de categorías registradas -->
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title">Listado de Categorías</h5>
+        <!-- Botón para actualizar la lista de categorías -->
+        <button class="btn btn-sm btn-outline-secondary" onclick="CategoryUI.loadCategories()">
+          <i class="bi bi-arrow-repeat"></i> Actualizar
+        </button>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th width="10%">ID</th>
+                <th width="70%">Nombre</th>
+                <th width="20%" class="text-end">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="categoriesTableBody">
+              <!-- Aquí se cargan dinámicamente las filas de categorías -->
+              <tr>
+                <td colspan="3" class="text-center py-4">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Bootstrap JS para componentes interactivos -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Script principal de la aplicación -->
+  <script src="app.js"></script>
+</body>
+</html>

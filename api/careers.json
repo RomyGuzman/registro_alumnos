@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1750542682493,
+    "name": "ciencia de datos e ia",
+    "duration": "3",
+    "categoryName": "tecnico"
+  },
+  {
+    "id": 1750542695648,
+    "name": "enfermeria",
+    "duration": "3",
+    "categoryName": "salud"
+  },
+  {
+    "id": 1750542721529,
+    "name": "prof de ingles",
+    "duration": "4",
+    "categoryName": "educacion"
+  },
+  {
+    "id": 1750542736257,
+    "name": "prof inicial",
+    "duration": "4",
+    "categoryName": "educacion"
+  },
+  {
+    "id": 1750542760432,
+    "name": "prof matematica",
+    "duration": "4",
+    "categoryName": "educacion"
+  },
+  {
+    "id": 1750542770971,
+    "name": "seguridad e higiene",
+    "duration": "3",
+    "categoryName": "tecnico"
+  }
+]
