@@ -1,0 +1,18 @@
+[
+  {
+    "id": 4,
+    "name": "salud"
+  },
+  {
+    "id": 5,
+    "name": "educacion"
+  },
+  {
+    "id": 6,
+    "name": "tecnico"
+  },
+  {
+    "id": 7,
+    "name": "ingenieria"
+  }
+]

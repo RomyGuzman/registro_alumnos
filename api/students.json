@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "id": 19,
+    "name": "romina",
+    "career": "Ingeniería en Sistemas",
+    "age": "38",
+    "dni": "32555777"
+  }
+]
