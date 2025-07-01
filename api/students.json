@@ -1,9 +1,16 @@
 [
   {
-    "id": 19,
-    "name": "romina",
-    "career": "Ingeniería en Sistemas",
-    "age": "38",
-    "dni": "32555777"
+    "id": 21,
+    "name": "lucia",
+    "career": "psicologia",
+    "age": 30,
+    "dni": "33333333"
+  },
+  {
+    "id": 22,
+    "name": "vanesa",
+    "career": "nuevacarrera",
+    "age": 30,
+    "dni": "44444444"
   }
 ]

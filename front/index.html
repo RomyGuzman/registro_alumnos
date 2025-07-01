@@ -6,149 +6,50 @@
   <title>Campus360 - Gestión Educativa</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-  <style>
-    :root {
-      --primary: #2563eb;
-      --primary-light: #3b82f6;
-      --secondary: #e11d48;
-      --dark: #1e293b;
-      --light: #f8fafc;
-      --gray: #64748b;
-      --light-gray: #e2e8f0;
-    }
-
-    body {
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background-color: #f9fafb;
-      color: var(--dark);
-      line-height: 1.6;
-    }
-
-    .hero-section {
-      background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(59, 130, 246, 0.05));
-      border-radius: 24px;
-      padding: 4rem 2rem;
-      margin: 2rem 0;
-      text-align: center;
-    }
-
-    .feature-card {
-      border: none;
-      border-radius: 16px;
-      background: white;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
-      transition: all 0.3s ease;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .feature-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.05);
-    }
-
-    .feature-icon {
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
-      color: var(--primary);
-    }
-
-    .btn-primary {
-      background-color: var(--primary);
-      border-color: var(--primary);
-      padding: 0.75rem 1.5rem;
-      border-radius: 12px;
-      font-weight: 500;
-      transition: all 0.3s;
-    }
-
-    .btn-primary:hover {
-      background-color: var(--primary-light);
-      transform: translateY(-2px);
-    }
-
-    .navbar-glass {
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-    }
-
-    .brand-logo {
-      font-weight: 700;
-      color: var(--primary);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .nav-link {
-      color: var(--gray);
-      font-weight: 500;
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
-      transition: all 0.2s;
-    }
-
-    .nav-link:hover {
-      color: var(--primary);
-      background: rgba(37, 99, 235, 0.05);
-    }
-
-    .nav-link.active {
-      color: var(--primary);
-      background: rgba(37, 99, 235, 0.1);
-    }
-
-    .map-container {
-      border-radius: 16px;
-      overflow: hidden;
-      height: 300px;
-    }
-
-    footer {
-      background-color: var(--dark);
-      color: white;
-      padding: 2rem 0;
-      margin-top: 4rem;
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script defer src="app.js"></script>
 </head>
 <body>
-  <!-- Navbar -->
+  <!-- Navbar Unificada para TODAS las páginas -->
   <nav class="navbar navbar-expand-lg fixed-top navbar-glass">
     <div class="container">
-      <a class="navbar-brand brand-logo" href="#">
+      <a class="navbar-brand brand-logo" href="index.html">
         <i class="bi bi-mortarboard"></i>
         <span>Campus360</span>
       </a>
-      <ul class="navbar-nav d-flex flex-row gap-2">
-        <li class="nav-item">
-          <a class="nav-link active" href="index.html">
-            <i class="bi bi-house-door me-1"></i> Inicio
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="estudiantes.html">
-            <i class="bi bi-people me-1"></i> Estudiantes
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="carreras.html">
-            <i class="bi bi-book me-1"></i> Programas
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="login.html">
-            <i class="bi bi-box-arrow-in-right me-1"></i> Acceso
-          </a>
-        </li>
-      </ul>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto d-flex flex-row gap-2">
+          <li class="nav-item">
+            <a class="nav-link {INICIO_ACTIVE}" href="index.html">
+              <i class="bi bi-house-door me-1"></i> Inicio
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {ESTUDIANTES_ACTIVE}" href="estudiantes.html">
+              <i class="bi bi-people me-1"></i> Estudiantes
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {CARRERAS_ACTIVE}" href="carreras.html">
+              <i class="bi bi-book me-1"></i> Carreras
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {CATEGORIAS_ACTIVE}" href="categorias.html">
+              <i class="bi bi-tags me-1"></i> Categorías
+            </a>
+          </li>
+        </ul>
+      </div>
     </div>
   </nav>
 
-  <!-- Hero Section -->
-  <main class="container py-5 mt-5">
+  <main class="container py-5 mt-4">
     <div class="hero-section">
       <h1 class="display-4 fw-bold mb-4">Gestión Educativa Integral</h1>
       <p class="lead mb-5">Plataforma de administración académica diseñada para simplificar la gestión de instituciones educativas</p>
@@ -156,13 +57,12 @@
         <a href="estudiantes.html" class="btn btn-primary btn-lg">
           <i class="bi bi-person-plus me-2"></i> Gestionar Estudiantes
         </a>
-        <a href="login.html" class="btn btn-outline-primary btn-lg">
+        <a href="#" class="btn btn-outline-primary btn-lg">
           <i class="bi bi-lock me-2"></i> Acceso Administrativo
         </a>
       </div>
     </div>
 
-    <!-- Features Grid -->
     <div class="row g-4 mb-5">
       <div class="col-md-4">
         <div class="feature-card p-4 text-center">
@@ -196,11 +96,10 @@
       </div>
     </div>
 
-    <!-- About Section -->
     <div class="row align-items-center mb-5">
       <div class="col-md-6">
         <h2 class="fw-bold mb-4">Nuestra Institución</h2>
-        <p class="mb-4">El Instituto Superior de Formación Docente y Técnica N° 57 de Chascomús se compromete con la excelencia académica y la formación integral de profesionales.</p>
+        <p class="mb-4">Comprometidos con la excelencia académica y la formación integral de profesionales.</p>
         <ul class="list-unstyled">
           <li class="mb-2"><i class="bi bi-check-circle-fill text-primary me-2"></i> Más de 20 años de experiencia</li>
           <li class="mb-2"><i class="bi bi-check-circle-fill text-primary me-2"></i> Profesores altamente calificados</li>
@@ -208,23 +107,15 @@
         </ul>
       </div>
       <div class="col-md-6">
-        <div class="map-container">
-          <iframe 
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3276.123456789012!2d-58.12345678901234!3d-34.12345678901234!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzTCsDA3JzI0LjQiUyA1OMKwMDcnMjQuNCJX!5e0!3m2!1ses!2sar!4v1234567890123!5m2!1ses!2sar" 
-            width="100%" 
-            height="100%" 
-            style="border:0;" 
-            allowfullscreen="" 
-            loading="lazy" 
-            referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <div class="map-container ratio ratio-16x9">
+          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3276.123456789012!2d-58.12345678901234!3d-34.12345678901234!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzTCsDA3JzI0LjQiUyA1OMKwMDcnMjQuNCJX!5e0!3m2!1ses!2sar!4v1234567890123!5m2!1ses!2sar" 
+            allowfullscreen="" loading="lazy"></iframe>
         </div>
       </div>
     </div>
-  </main>
 
-  <!-- Footer -->
-  <footer class="text-center">
-    <div class="container">
+    <footer class="bg-dark text-white py-4 mt-5">
+    <div class="container text-center">
       <div class="row">
         <div class="col-md-4 mb-4 mb-md-0">
           <h5>Campus360</h5>
@@ -232,15 +123,15 @@
         </div>
         <div class="col-md-4 mb-4 mb-md-0">
           <h5>Contacto</h5>
-          <p>contacto@instituto57.edu.ar<br>+54 2241 123456</p>
+          <p>contacto@instituto.edu.ar<br>+54 2241 123456</p>
         </div>
         <div class="col-md-4">
           <h5>Horarios</h5>
           <p>Lunes a Viernes<br>8:00 - 22:00 hs</p>
         </div>
       </div>
-      <hr class="my-4" style="border-color: rgba(255,255,255,0.1);">
-      <p class="mb-0">© 2023 Instituto Superior N°57. Todos los derechos reservados.</p>
+      <hr class="my-4 opacity-10">
+      <p class="mb-0">&copy; 2023 Campus360. Todos los derechos reservados.</p>
     </div>
   </footer>
 

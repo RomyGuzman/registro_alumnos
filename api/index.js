@@ -61,8 +61,7 @@ function loadCategories() {
     try {
         const data = fs.readFileSync(CATEGORIES_FILE, 'utf-8');
         return JSON.parse(data);
-    }
-    catch (error) {
+    } catch (error) {
         console.error("Error loading categories, using empty list.", error);
         return [];
     }
@@ -156,12 +155,12 @@ app.delete('/api/students/:id', (req, res) => {
 });
 
 // CRUD para carrera
-// POST /api/careers - Versión corregida
+// Registrar nueva carrera
 app.post('/api/careers', (req, res) => {
-    const { name, duration, categoryName } = req.body;
+    const { name, duration, categoryId } = req.body; // Cambié categoryName a categoryId
 
     // Validación mejorada
-    if (!name || !duration || !categoryName) {
+    if (!name || !duration || !categoryId) {
         return res.status(400).json({ 
             success: false,
             error: "Nombre, duración y categoría son campos obligatorios" 
@@ -170,7 +169,7 @@ app.post('/api/careers', (req, res) => {
 
     // Validar que la categoría exista (comparación insensible a mayúsculas)
     const categoryExists = categories.some(c => 
-        c.name.toLowerCase() === categoryName.toLowerCase()
+        c.id === categoryId // Cambié a buscar por ID
     );
     
     if (!categoryExists) {
@@ -185,7 +184,7 @@ app.post('/api/careers', (req, res) => {
         id: Date.now(), // ID único basado en timestamp
         name,
         duration,
-        categoryName
+        categoryId // Cambié a categoryId
     };
 
     // Agregar y guardar
@@ -333,4 +332,3 @@ app.delete('/api/categories/:id', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
-

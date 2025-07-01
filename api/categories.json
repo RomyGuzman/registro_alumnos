@@ -1,9 +1,5 @@
 [
   {
-    "id": 4,
-    "name": "salud"
-  },
-  {
     "id": 5,
     "name": "educacion"
   },
@@ -14,5 +10,25 @@
   {
     "id": 7,
     "name": "ingenieria"
+  },
+  {
+    "id": 8,
+    "name": "jajaja"
+  },
+  {
+    "id": 9,
+    "name": "jejeje"
+  },
+  {
+    "id": 10,
+    "name": "prueba"
+  },
+  {
+    "id": 11,
+    "name": "nuevacategoria"
+  },
+  {
+    "id": 12,
+    "name": "medio ambiente"
   }
 ]

@@ -8,11 +8,36 @@ const headers = {
 };
 
 // ======================
-// MÓDULO DE ESTUDIANTES
+// MANEJO DE ERRORES GLOBAL
 // ======================
+async function handleApiError(error) {
+  console.error('API Error:', error);
+  let errorMessage = 'Error en el servidor';
+  
+  if (error.response) {
+    try {
+      const data = await error.response.json();
+      errorMessage = data.message || error.response.statusText;
+    } catch (e) {
+      errorMessage = error.response.statusText;
+    }
+  } else if (error.message) {
+    errorMessage = error.message;
+  }
 
-// Cargar Carreras en Select
-// Esta función carga las carreras disponibles en un elemento select dado su ID.
+  await Swal.fire({
+    icon: 'error',
+    title: 'Error',
+    text: errorMessage,
+    timer: 3000
+  });
+  
+  return errorMessage;
+}
+
+// ======================
+// MÓDULO DE ESTUDIANTES (MEJORADO)
+// ======================
 async function loadCareersIntoSelect(selectId) {
   try {
     const response = await fetch(API_CAREERS_URL, { headers });
@@ -20,139 +45,156 @@ async function loadCareersIntoSelect(selectId) {
     const careers = await response.json();
     
     const selectElement = document.getElementById(selectId);
-    const isFilter = selectId === 'filterCareer';
+    selectElement.innerHTML = '';
     
-    selectElement.innerHTML = isFilter
-      ? '<option value="" selected>Todas las carreras</option>'
+    const defaultOption = selectId.includes('filter') 
+      ? '<option value="">Todas las carreras</option>'
       : '<option value="" disabled selected>Seleccione carrera</option>';
     
-    selectElement.innerHTML += careers.map(career => `
+    selectElement.innerHTML = defaultOption + careers.map(career => `
       <option value="${career.id}">${career.name}</option>
     `).join('');
   } catch (error) {
-    console.error("Error cargando carreras:", error);
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'No se pudieron cargar las carreras'
-    });
+    await handleApiError(error);
   }
 }
 
-// Registro de Estudiante
-// Esta función registra un nuevo estudiante con los datos proporcionados en el formulario.
 async function registerStudent() {
-  const name = document.getElementById('registerName').value.trim();
-  const careerId = document.getElementById('registerCareer').value;
-  const age = document.getElementById('registerEdad').value;
-  const dni = document.getElementById('registerDNI').value.trim();
+  const nameInput = document.getElementById('registerName');
+  const careerSelect = document.getElementById('registerCareer');
+  const ageInput = document.getElementById('registerEdad');
+  const dniInput = document.getElementById('registerDNI');
 
+  const name = nameInput.value.trim();
+  const careerId = careerSelect.value;
+  const age = ageInput.value;
+  const dni = dniInput.value.trim();
+
+  // Validación mejorada
   if (!name || !careerId || !age || !dni) {
-    Swal.fire({
+    await Swal.fire({
       icon: 'error',
       title: 'Error',
-      text: 'Todos los campos son obligatorios'
+      text: 'Todos los campos son obligatorios',
+      timer: 2000
     });
     return;
   }
 
   try {
+    const loadingAlert = Swal.fire({
+      title: 'Registrando...',
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading()
+    });
+
+    // Verificar que la carrera exista
     const careerResponse = await fetch(`${API_CAREERS_URL}/${careerId}`, { headers });
     if (!careerResponse.ok) throw new Error("Carrera no encontrada");
-    const careerData = await careerResponse.json();
+    const career = await careerResponse.json();
 
+    // Registrar estudiante
     const response = await fetch(API_STUDENTS_URL, {
       method: "POST",
       headers,
       body: JSON.stringify({ 
         name, 
-        career: careerData.name,
-        age, 
+        career: career.name,
+        age: parseInt(age),
         dni 
       })
     });
 
     if (!response.ok) throw new Error(await response.text());
 
-    Swal.fire({
+    await loadingAlert.close();
+    
+    await Swal.fire({
       icon: 'success',
       title: 'Éxito',
       text: 'Estudiante registrado correctamente',
-      timer: 2000
+      timer: 2000,
+      showConfirmButton: false
     });
 
     // Limpiar formulario
-    document.getElementById('registerName').value = '';
-    document.getElementById('registerCareer').selectedIndex = 0;
-    document.getElementById('registerEdad').value = '';
-    document.getElementById('registerDNI').value = '';
+    nameInput.value = '';
+    careerSelect.selectedIndex = 0;
+    ageInput.value = '';
+    dniInput.value = '';
 
     // Recargar tabla
-    loadStudentsTable();
+    await loadStudentsTable();
   } catch (error) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: error.message || 'Error al registrar estudiante'
-    });
+    await handleApiError(error);
   }
 }
 
-// Cargar tabla de estudiantes
-// Esta función carga y muestra la lista de estudiantes en una tabla, aplicando filtros si es necesario.
 async function loadStudentsTable() {
   try {
-    const nameSearch = document.getElementById('searchInput').value.toLowerCase();
-    const careerFilter = document.getElementById('filterCareer').value;
-
-    const response = await fetch(API_STUDENTS_URL, { headers });
-    if (!response.ok) throw new Error("Error al obtener estudiantes");
+    const nameSearch = document.getElementById('searchInput')?.value.toLowerCase() || '';
+    const careerFilter = document.getElementById('filterCareer')?.value || '';
     
-    let students = await response.json();
+    const [studentsRes, careersRes] = await Promise.all([
+      fetch(API_STUDENTS_URL, { headers }),
+      fetch(API_CAREERS_URL, { headers })
+    ]);
+    
+    if (!studentsRes.ok || !careersRes.ok) {
+      throw new Error('Error al cargar datos');
+    }
+    
+    let [students, careers] = await Promise.all([
+      studentsRes.json(),
+      careersRes.json()
+    ]);
 
     // Aplicar filtros
     if (nameSearch) {
       students = students.filter(s => 
         s.name.toLowerCase().includes(nameSearch) || 
-        s.dni.includes(nameSearch)
+        s.dni.toLowerCase().includes(nameSearch)
       );
     }
 
     if (careerFilter) {
-      const careerResponse = await fetch(`${API_CAREERS_URL}/${careerFilter}`, { headers });
-      if (!careerResponse.ok) throw new Error("Error al filtrar por carrera");
-      const careerData = await careerResponse.json();
-      
-      students = students.filter(s => s.career === careerData.name);
+      const selectedCareer = careers.find(c => c.id == careerFilter);
+      if (selectedCareer) {
+        students = students.filter(s => s.career === selectedCareer.name);
+      }
     }
 
+    // Renderizar tabla
     const tbody = document.getElementById('studentsTableBody');
-    tbody.innerHTML = students.length 
-      ? students.map(student => `
-          <tr>
-            <td>${student.id}</td>
-            <td>${student.name}</td>
-            <td>${student.career}</td>
-            <td>${student.age}</td>
-            <td>${student.dni}</td>
-            <td class="text-end">
-              <button onclick="deleteStudent('${student.id}')" 
-                      class="btn btn-sm btn-danger">
-                Eliminar
-              </button>
+    if (tbody) {
+      tbody.innerHTML = students.length > 0
+        ? students.map(student => `
+            <tr>
+              <td>${student.id}</td>
+              <td>${student.name}</td>
+              <td>${student.career}</td>
+              <td>${student.age}</td>
+              <td>${student.dni}</td>
+              <td class="text-end">
+                <button onclick="deleteStudent('${student.id}')" 
+                  class="btn btn-sm btn-danger">
+                  <i class="bi bi-trash"></i> Eliminar
+                </button>
+              </td>
+            </tr>
+          `).join('')
+        : `<tr>
+            <td colspan="6" class="text-center text-muted py-4">
+              <i class="bi bi-people display-6 d-block mb-2"></i>
+              No hay estudiantes registrados
             </td>
-          </tr>
-        `).join('')
-      : `<tr><td colspan="6" class="text-center text-muted">No se encontraron estudiantes</td></tr>`;
+          </tr>`;
+    }
   } catch (error) {
-    console.error("Error cargando estudiantes:", error);
-    document.getElementById('studentsTableBody').innerHTML = `
-      <tr><td colspan="6" class="text-center text-danger">Error al cargar estudiantes</td></tr>`;
+    await handleApiError(error);
   }
 }
 
-// Eliminar estudiante
-// Esta función elimina un estudiante dado su ID después de confirmar la acción.
 async function deleteStudent(id) {
   try {
     const result = await Swal.fire({
@@ -166,6 +208,12 @@ async function deleteStudent(id) {
     });
 
     if (result.isConfirmed) {
+      const loadingAlert = Swal.fire({
+        title: 'Eliminando...',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
+
       const response = await fetch(`${API_STUDENTS_URL}/${id}`, {
         method: "DELETE",
         headers
@@ -173,234 +221,398 @@ async function deleteStudent(id) {
       
       if (!response.ok) throw new Error(await response.text());
       
-      Swal.fire({
+      await loadingAlert.close();
+      
+      await Swal.fire({
         icon: 'success',
         title: 'Eliminado',
         text: 'Estudiante eliminado correctamente',
-        timer: 1500
+        timer: 1500,
+        showConfirmButton: false
       });
       
-      loadStudentsTable();
+      await loadStudentsTable();
     }
   } catch (error) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: error.message || 'Error al eliminar estudiante'
-    });
+    await handleApiError(error);
   }
 }
 
-// Limpiar filtros
-// Esta función restablece los filtros de búsqueda y recarga la tabla de estudiantes.
-function clearFilters() {
-  document.getElementById('searchInput').value = '';
-  document.getElementById('filterCareer').selectedIndex = 0;
-  loadStudentsTable();
+// ======================
+// MÓDULO DE CARRERAS (MEJORADO)
+// ======================
+const CareerManager = {
+    async register(name, duration, categoryId) {
+        try {
+            const response = await fetch(API_CAREERS_URL, {
+                method: "POST",
+                headers,
+                body: JSON.stringify({ name, duration, categoryId })
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || "Error al registrar carrera");
+            }
+            
+            return await response.json();
+        } catch (error) {
+            console.error("Error registrando carrera:", error);
+            throw error;
+        }
+    },
+
+    async getAll() {
+        try {
+            const response = await fetch(API_CAREERS_URL, { headers });
+            if (!response.ok) throw new Error("Error al obtener carreras");
+            return await response.json();
+        } catch (error) {
+            console.error("Error obteniendo carreras:", error);
+            return [];
+        }
+    },
+
+    async delete(id) {
+        try {
+            const response = await fetch(`${API_CAREERS_URL}/${id}`, {
+                method: "DELETE",
+                headers
+            });
+            
+            if (!response.ok) throw new Error("Error al eliminar");
+            return await response.json();
+        } catch (error) {
+            console.error("Error eliminando carrera:", error);
+            throw error;
+        }
+    }
+};
+
+const CareerUI = {
+    async handleRegister() {
+        const nameInput = document.getElementById('registerName');
+        const durationInput = document.getElementById('registerDuration');
+        const categorySelect = document.getElementById('registerCategory');
+        
+        const name = nameInput.value.trim();
+        const duration = durationInput.value.trim();
+        const categoryId = Number(categorySelect.value);
+
+        if (!name || !duration || !categoryId) {
+            await Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Todos los campos son obligatorios',
+                timer: 2000
+            });
+            return;
+        }
+
+        try {
+            const loadingAlert = Swal.fire({
+                title: 'Registrando...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            await CareerManager.register(name, duration, categoryId);
+            
+            await loadingAlert.close();
+            
+            await Swal.fire({
+                icon: 'success',
+                title: 'Éxito',
+                text: 'Carrera registrada correctamente',
+                timer: 2000,
+                showConfirmButton: false
+            });
+
+            nameInput.value = '';
+            durationInput.value = '';
+            categorySelect.selectedIndex = 0;
+
+            await this.loadCareers();
+        } catch (error) {
+            await handleApiError(error);
+        }
+    },
+
+    async loadCategories() {
+        try {
+            const response = await fetch(API_CATEGORIES_URL, { headers });
+            if (!response.ok) throw new Error("Error al cargar categorías");
+            
+            const categories = await response.json();
+            const select = document.getElementById('registerCategory');
+            
+            if (select) {
+                select.innerHTML = `
+                    <option value="" disabled selected>Seleccione categoría</option>
+                    ${categories.map(cat => `
+                        <option value="${cat.id}">${cat.name}</option>
+                    `).join('')}
+                `;
+            }
+            
+            return categories;
+        } catch (error) {
+            await handleApiError(error);
+            return [];
+        }
+    },
+
+    async loadCareers() {
+        try {
+            const careers = await CareerManager.getAll();
+            const tbody = document.getElementById('careersTableBody');
+            
+            if (tbody) {
+                tbody.innerHTML = careers.length > 0
+                    ? careers.map(career => `
+                        <tr>
+                            <td>${career.id}</td>
+                            <td>${career.name}</td>
+                            <td>${career.duration} años</td>
+                            <td>${career.category?.name || 'Sin categoría'}</td>
+                            <td class="text-end">
+                                <button onclick="CareerUI.deleteCareer('${career.id}')" 
+                                    class="btn btn-sm btn-danger">
+                                    <i class="bi bi-trash"></i> Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('')
+                    : `<tr>
+                        <td colspan="5" class="text-center text-muted py-4">
+                            <i class="bi bi-book display-6 d-block mb-2"></i>
+                            No hay carreras registradas
+                        </td>
+                    </tr>`;
+            }
+        } catch (error) {
+            await handleApiError(error);
+        }
+    },
+
+    async deleteCareer(id) {
+        try {
+            const result = await Swal.fire({
+                title: '¿Eliminar carrera?',
+                text: "Esta acción no se puede deshacer",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar'
+            });
+
+            if (result.isConfirmed) {
+                const loadingAlert = Swal.fire({
+                    title: 'Eliminando...',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+
+                await CareerManager.delete(id);
+                
+                await loadingAlert.close();
+                
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Eliminada',
+                    text: 'Carrera eliminada correctamente',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+
+                await this.loadCareers();
+            }
+        } catch (error) {
+            await handleApiError(error);
+        }
+    },
+
+    renderCareers(careers) {
+      const tbody = document.getElementById('careersTableBody');
+      if (tbody) {
+        tbody.innerHTML = careers.length > 0
+          ? careers.map(career => `
+              <tr>
+                <td>${career.id}</td>
+                <td>${career.name}</td>
+                <td>${career.duration} años</td>
+                <td>${career.category?.name || 'Sin categoría'}</td>
+                <td class="text-end">
+                  <button onclick="CareerUI.deleteCareer('${career.id}')" 
+                    class="btn btn-sm btn-danger">
+                    <i class="bi bi-trash"></i> Eliminar
+                  </button>
+                </td>
+              </tr>
+            `).join('')
+          : `<tr>
+              <td colspan="5" class="text-center text-muted py-4">
+                <i class="bi bi-book display-6 d-block mb-2"></i>
+                No hay carreras registradas
+              </td>
+            </tr>`;
+      }
+    }
+};
+
+// ======================
+// MANEJO DE ERRORES GLOBAL
+// ======================
+async function handleApiError(error) {
+    console.error('API Error:', error);
+    let errorMessage = 'Error en el servidor';
+    
+    if (error.response) {
+        try {
+            const data = await error.response.json();
+            errorMessage = data.message || error.response.statusText;
+        } catch (e) {
+            errorMessage = error.response.statusText;
+        }
+    } else if (error.message) {
+        errorMessage = error.message;
+    }
+
+    await Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: errorMessage,
+        timer: 3000
+    });
+    
+    return errorMessage;
 }
 
-// Inicialización
-// Esta función se ejecuta al cargar el documento y carga las carreras y estudiantes.
-document.addEventListener('DOMContentLoaded', () => {
-  loadCareersIntoSelect('registerCareer');
-  loadCareersIntoSelect('filterCareer');
-  loadStudentsTable();
-});
 
-
-// ===================
-// MÓDULO DE CARRERAS (VERSIÓN CORREGIDA)
-// ===================
-const CareerManager = {
-  // Registrar carrera
-  // Esta función registra una nueva carrera con los datos proporcionados.
-  async register(name, duration, categoryName) {
+// ======================
+// MÓDULO DE CATEGORÍAS (MEJORADO)
+// ======================
+const CategoryManager = {
+  async register(name) {
     try {
-      const response = await fetch(API_CAREERS_URL, {
+      const response = await fetch(API_CATEGORIES_URL, {
         method: "POST",
         headers,
-        body: JSON.stringify({ name, duration, categoryName })
+        body: JSON.stringify({ name })
       });
       
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Error en el servidor");
-      }
-      
+      if (!response.ok) throw new Error("Error al registrar categoría");
       return await response.json();
     } catch (error) {
-      console.error("Error registrando carrera:", error);
+      console.error("Error registrando categoría:", error);
       throw error;
     }
   },
 
-  // Obtener todas las carreras
-  // Esta función obtiene y devuelve todas las carreras registradas.
   async getAll() {
     try {
-      const response = await fetch(API_CAREERS_URL, { headers });
-      if (!response.ok) throw new Error("Error al obtener carreras");
+      const response = await fetch(API_CATEGORIES_URL, { headers });
+      if (!response.ok) throw new Error("Error al obtener categorías");
       return await response.json();
     } catch (error) {
-      console.error("Error obteniendo carreras:", error);
+      console.error("Error obteniendo categorías:", error);
       return [];
     }
   },
 
-  // Eliminar carrera
-  // Esta función elimina una carrera dada su ID.
   async delete(id) {
     try {
-      const response = await fetch(`${API_CAREERS_URL}/${id}`, {
+      const response = await fetch(`${API_CATEGORIES_URL}/${id}`, {
         method: "DELETE",
         headers
       });
-      if (!response.ok) throw new Error(await response.text());
+      
+      if (!response.ok) throw new Error("Error al eliminar categoría");
       return await response.json();
     } catch (error) {
-      console.error("Error eliminando carrera:", error);
-      throw new Error("No se pudo eliminar la carrera");
+      console.error("Error eliminando categoría:", error);
+      throw error;
     }
   }
 };
 
-const CareerUI = {
-  // Manejar registro de carrera
-  // Esta función gestiona el registro de una nueva carrera a través de la interfaz de usuario.
+const CategoryUI = {
   async handleRegister() {
     const nameInput = document.getElementById('registerName');
-    const durationInput = document.getElementById('registerDuration');
-    const categorySelect = document.getElementById('registerCategory');
-    
     const name = nameInput.value.trim();
-    const duration = durationInput.value.trim();
-    const categoryName = categorySelect.options[categorySelect.selectedIndex].text;
-
-    // Validación mejorada
-    if (!name || !duration || !categoryName || categorySelect.value === "") {
-      Swal.fire({
+    
+    if (!name) {
+      await Swal.fire({
         icon: 'error',
-        title: 'Campos incompletos',
-        text: 'Nombre, duración y categoría son campos obligatorios',
-        timer: 3000
+        title: 'Error',
+        text: 'Debe ingresar un nombre válido',
+        timer: 2000
       });
       return;
     }
 
     try {
-      const swal = Swal.fire({
-        title: 'Registrando carrera',
-        html: 'Por favor espere...',
+      const loadingAlert = Swal.fire({
+        title: 'Registrando...',
         allowOutsideClick: false,
         didOpen: () => Swal.showLoading()
       });
 
-      const result = await CareerManager.register(name, duration, categoryName);
-
-      swal.close();
-      Swal.fire({
+      await CategoryManager.register(name);
+      
+      await loadingAlert.close();
+      
+      await Swal.fire({
         icon: 'success',
-        title: '¡Registrado!',
-        text: result.message || 'Carrera registrada correctamente',
+        title: 'Éxito',
+        text: 'Categoría registrada correctamente',
         timer: 2000,
         showConfirmButton: false
       });
 
-      // Limpiar formulario
       nameInput.value = '';
-      durationInput.value = '';
-      categorySelect.selectedIndex = 0;
-
-      // Actualizar tabla
-      await this.loadCareers();
+      await this.loadCategories();
     } catch (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error al registrar',
-        text: error.message || 'Ocurrió un error desconocido',
-        timer: 3000
-      });
+      await handleApiError(error);
     }
   },
 
-  // Cargar categorías en el select
-  // Esta función carga las categorías disponibles en un elemento select.
-  async loadCategoriesIntoSelect() {
+  async loadCategories() {
     try {
-      const response = await fetch(API_CATEGORIES_URL, { headers });
-      if (!response.ok) throw new Error("Error al cargar categorías");
-      const categories = await response.json();
+      const categories = await CategoryManager.getAll();
+      const tbody = document.getElementById('categoriesTableBody');
       
-      const select = document.getElementById('registerCategory');
-      select.innerHTML = `
-        <option value="" disabled selected>Seleccione una categoría</option>
-        ${categories.map(cat => `
-          <option value="${cat.id}">${cat.name}</option>
-        `).join('')}
-      `;
-    } catch (error) {
-      console.error("Error cargando categorías:", error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'No se pudieron cargar las categorías'
-      });
-    }
-  },
-
-  // Cargar carreras en la tabla
-  // Esta función carga y muestra la lista de carreras en una tabla.
-  async loadCareers() {
-    try {
-      const careers = await CareerManager.getAll();
-      const tbody = document.getElementById('careersTableBody');
-      
-      if (!tbody) return;
-
-      if (careers.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="5" class="text-center text-muted">
-              No hay carreras registradas
-            </td>
-          </tr>`;
-        return;
-      }
-
-      tbody.innerHTML = careers.map(career => `
-        <tr data-career-id="${career.id}">
-          <td>${career.id}</td>
-          <td>${career.name}</td>
-          <td>${career.duration} años</td>
-          <td>${career.categoryName}</td>
-          <td class="text-end">
-            <button onclick="CareerUI.deleteCareer('${career.id}')" 
-                    class="btn btn-sm btn-danger">
-              Eliminar
-            </button>
-          </td>
-        </tr>
-      `).join('');
-    } catch (error) {
-      console.error("Error mostrando carreras:", error);
-      const tbody = document.getElementById('careersTableBody');
       if (tbody) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="5" class="text-center text-danger">
-              Error al cargar las carreras
-            </td>
-          </tr>`;
+        tbody.innerHTML = categories.length > 0
+          ? categories.map(category => `
+              <tr>
+                <td>${category.id}</td>
+                <td>${category.name}</td>
+                <td class="text-end">
+                  <button onclick="CategoryUI.deleteCategory('${category.id}')" 
+                    class="btn btn-sm btn-danger">
+                    <i class="bi bi-trash"></i> Eliminar
+                  </button>
+                </td>
+              </tr>
+            `).join('')
+          : `<tr>
+              <td colspan="3" class="text-center text-muted py-4">
+                <i class="bi bi-tags display-6 d-block mb-2"></i>
+                No hay categorías registradas
+              </td>
+            </tr>`;
       }
+    } catch (error) {
+      await handleApiError(error);
     }
   },
 
-  // Eliminar carrera
-  // Esta función elimina una carrera dada su ID después de confirmar la acción.
-  async deleteCareer(id) {
+  async deleteCategory(id) {
     try {
       const result = await Swal.fire({
-        title: '¿Eliminar carrera?',
+        title: '¿Eliminar categoría?',
         text: "Esta acción no se puede deshacer",
         icon: 'warning',
         showCancelButton: true,
@@ -410,204 +622,19 @@ const CareerUI = {
       });
 
       if (result.isConfirmed) {
-        Swal.fire({
+        const loadingAlert = Swal.fire({
           title: 'Eliminando...',
-          allowOutsideClick: false,
-          didOpen: () => Swal.showLoading()
-        });
-
-        await CareerManager.delete(id);
-        
-        Swal.fire({
-          icon: 'success',
-          title: '¡Eliminada!',
-          text: 'Carrera eliminada correctamente',
-          timer: 1500,
-          showConfirmButton: false
-        });
-
-        await this.loadCareers();
-      }
-    } catch (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: error.message || 'Error al eliminar la carrera'
-      });
-    }
-  }
-};
-
-// ===================
-// INICIALIZACIÓN
-// ===================
-// Esta función se ejecuta al cargar el documento y carga las carreras y categorías.
-document.addEventListener('DOMContentLoaded', () => {
-  if (document.getElementById('careersTableBody')) {
-    CareerUI.loadCareers();
-    CareerUI.loadCategoriesIntoSelect();
-  }
-});
-
-
-// ======================
-// MÓDULO DE CATEGORÍAS
-// ======================
-
-// Módulo de Categorías (Versión mejorada)
-const CategoryManager = {
-  API_URL: "http://localhost:5001/api/categories",
-  headers: {
-    "Content-Type": "application/json",
-    "Authorization": "Bearer 12345ABCDEF"
-  },
-
-  // Registrar nueva categoría
-  // Esta función registra una nueva categoría con el nombre proporcionado.
-  async register(name) {
-    try {
-      const response = await fetch(this.API_URL, {
-        method: "POST",
-        headers: this.headers,
-        body: JSON.stringify({ name })
-      });
-      
-      if (!response.ok) throw new Error("Error en el servidor");
-      return await response.json();
-    } catch (error) {
-      console.error("Error registrando categoría:", error);
-      throw error;
-    }
-  },
-
-  // Obtener todas las categorías
-  // Esta función obtiene y devuelve todas las categorías registradas.
-  async getAll() {
-    try {
-      const response = await fetch(this.API_URL, {
-        headers: this.headers
-      });
-      
-      if (!response.ok) throw new Error("Error al obtener categorías");
-      return await response.json();
-    } catch (error) {
-      console.error("Error obteniendo categorías:", error);
-      return [];
-    }
-  },
-
-  // Eliminar categoría
-  // Esta función elimina una categoría dada su ID.
-  async delete(id) {
-    try {
-      const response = await fetch(`${this.API_URL}/${id}`, {
-        method: "DELETE",
-        headers: this.headers
-      });
-      
-      if (!response.ok) throw new Error("Error al eliminar");
-      return await response.json();
-    } catch (error) {
-      console.error("Error eliminando categoría:", error);
-      throw error;
-    }
-  }
-};
-
-// Controlador de interfaz para categorías
-const CategoryUI = {
-  // Cargar tabla de categorías
-  // Esta función carga y muestra la lista de categorías en una tabla.
-  async loadCategories() {
-    try {
-      const categories = await CategoryManager.getAll();
-      const tbody = document.getElementById('categoriesTableBody');
-      
-      tbody.innerHTML = categories.length > 0 
-        ? categories.map(cat => `
-            <tr data-category-id="${cat.id}">
-              <td>${cat.id}</td>
-              <td>${cat.name}</td>
-              <td class="text-end">
-                <button class="btn btn-sm btn-danger delete-btn" data-id="${cat.id}">
-                  Eliminar
-                </button>
-              </td>
-            </tr>
-          `).join('')
-        : `<tr><td colspan="3" class="text-center text-muted">No hay categorías registradas</td></tr>`;
-      
-      // Agregar event listeners a los botones
-      document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', () => this.deleteCategory(btn.dataset.id));
-      });
-    } catch (error) {
-      console.error("Error cargando categorías:", error);
-    }
-  },
-
-  // Manejar registro
-  // Esta función gestiona el registro de una nueva categoría a través de la interfaz de usuario.
-  async handleRegister() {
-    const nameInput = document.getElementById('registerName');
-    const name = nameInput.value.trim();
-    
-    if (!name) {
-      Swal.fire('Error', 'Debe ingresar un nombre válido', 'warning');
-      return;
-    }
-
-    try {
-      Swal.fire({
-        title: 'Registrando...',
-        allowEscapeKey: false,
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading()
-      });
-
-      const result = await CategoryManager.register(name);
-      
-      Swal.fire({
-        icon: 'success',
-        title: '¡Registrado!',
-        text: 'Categoría creada exitosamente',
-        timer: 1500,
-        showConfirmButton: false
-      });
-
-      nameInput.value = '';
-      await this.loadCategories();
-    } catch (error) {
-      Swal.fire('Error', error.message || 'Error al registrar categoría', 'error');
-    }
-  },
-
-  // Manejar eliminación
-  // Esta función elimina una categoría dada su ID después de confirmar la acción.
-  async deleteCategory(id) {
-    try {
-      const result = await Swal.fire({
-        title: '¿Eliminar categoría?',
-        text: "Esta acción no se puede deshacer",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6'
-      });
-
-      if (result.isConfirmed) {
-        Swal.fire({
-          title: 'Eliminando...',
-          allowEscapeKey: false,
           allowOutsideClick: false,
           didOpen: () => Swal.showLoading()
         });
 
         await CategoryManager.delete(id);
         
-        Swal.fire({
+        await loadingAlert.close();
+        
+        await Swal.fire({
           icon: 'success',
-          title: '¡Eliminada!',
+          title: 'Eliminada',
           text: 'Categoría eliminada correctamente',
           timer: 1500,
           showConfirmButton: false
@@ -616,22 +643,103 @@ const CategoryUI = {
         await this.loadCategories();
       }
     } catch (error) {
-      Swal.fire('Error', error.message || 'Error al eliminar categoría', 'error');
+      await handleApiError(error);
+    }
+  },
+
+  renderCategories(categories) {
+    const tbody = document.getElementById('categoriesTableBody');
+    if (tbody) {
+      tbody.innerHTML = categories.length > 0
+        ? categories.map(category => `
+            <tr>
+              <td>${category.id}</td>
+              <td>${category.name}</td>
+              <td class="text-end">
+                <button onclick="CategoryUI.deleteCategory('${category.id}')" 
+                  class="btn btn-sm btn-danger">
+                  <i class="bi bi-trash"></i> Eliminar
+                </button>
+              </td>
+            </tr>
+          `).join('')
+        : `<tr>
+            <td colspan="3" class="text-center text-muted py-4">
+              <i class="bi bi-tags display-6 d-block mb-2"></i>
+              No hay categorías registradas
+            </td>
+          </tr>`;
     }
   }
 };
 
-// Inicialización
-// Esta función se ejecuta al cargar el documento y carga las categorías iniciales.
-document.addEventListener('DOMContentLoaded', () => {
-  // Aplicar clase específica a la página
-  document.body.classList.add('category-page');
-  
-  // Cargar categorías iniciales
-  CategoryUI.loadCategories();
-  
-  // Configurar botón de registro
-  document.getElementById('registerBtn')?.addEventListener('click', () => {
-    CategoryUI.handleRegister();
+// ======================
+// INICIALIZACIÓN GLOBAL
+// ======================
+document.addEventListener('DOMContentLoaded', async () => {
+  // Manejo de errores no capturados
+  window.addEventListener('unhandledrejection', event => {
+    console.error('Unhandled rejection:', event.reason);
+    handleApiError(event.reason);
+    event.preventDefault();
   });
+
+  // Configurar navbar activa
+  const currentPage = location.pathname.split('/').pop() || 'index.html';
+  document.querySelectorAll('.nav-link').forEach(link => {
+    const linkPage = link.getAttribute('href');
+    if (linkPage === currentPage) {
+      link.classList.add('active');
+    } else {
+      link.classList.remove('active');
+    }
+  });
+
+  // Inicializar módulos según la página
+  if (currentPage === 'estudiantes.html') {
+    await loadCareersIntoSelect('registerCareer');
+    await loadCareersIntoSelect('filterCareer');
+    await loadStudentsTable();
+  } 
+  else if (currentPage === 'carreras.html') {
+    await CareerUI.loadCategories();
+    await CareerUI.loadCareers();
+
+    // Configurar filtrado
+    const filterForm = document.getElementById('filterCareerForm');
+    if (filterForm) {
+      filterForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const nameValue = document.getElementById('filterCareerName').value.toLowerCase();
+        const durationValue = document.getElementById('filterCareerDuration').value.toLowerCase();
+        const careers = await CareerManager.getAll();
+        const filtered = careers.filter(career =>
+          career.name.toLowerCase().includes(nameValue) &&
+          (durationValue === "" || career.duration.toString().toLowerCase().includes(durationValue))
+        );
+        CareerUI.renderCareers(filtered);
+      });
+    }
+  }
+  else if (currentPage === 'categorias.html') {
+    await CategoryUI.loadCategories();
+
+    // Configurar evento del botón de registro
+    const registerBtn = document.getElementById('registerBtn');
+    if (registerBtn) {
+      registerBtn.addEventListener('click', () => CategoryUI.handleRegister());
+    }
+
+    // Configurar filtrado
+    const filterForm = document.getElementById('filterCategoryForm');
+    if (filterForm) {
+      filterForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const filterValue = document.getElementById('filterCategoryName').value.toLowerCase();
+        const categories = await CategoryManager.getAll();
+        const filtered = categories.filter(cat => cat.name.toLowerCase().includes(filterValue));
+        CategoryUI.renderCategories(filtered);
+      });
+    }
+  }
 });

@@ -4,5 +4,17 @@
     "name": "Ingeniería en Sistemas",
     "duration": "5",
     "categoryName": "Tecnología"
+  },
+  {
+    "id": 1751391658172,
+    "name": "nuevacarrera",
+    "duration": "3",
+    "categoryId": 10
+  },
+  {
+    "id": 1751392744638,
+    "name": "psicologia",
+    "duration": "5",
+    "categoryId": 10
   }
 ]
