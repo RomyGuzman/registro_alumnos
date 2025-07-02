@@ -16,5 +16,11 @@
     "name": "psicologia",
     "duration": "5",
     "categoryId": 10
+  },
+  {
+    "id": 1751414440829,
+    "name": "test",
+    "duration": "5",
+    "categoryId": 13
   }
 ]

@@ -12,5 +12,12 @@
     "career": "nuevacarrera",
     "age": 30,
     "dni": "44444444"
+  },
+  {
+    "id": 23,
+    "name": "test",
+    "career": "test",
+    "age": 30,
+    "dni": "30901092"
   }
 ]
